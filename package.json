@@ -1,0 +1,32 @@
+{
+  "name": "k3r-link",
+  "version": "0.0.0",
+  "description": "Source code of k3r.link",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node .",
+    "test": "exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KEEER/k3r.link.git"
+  },
+  "keywords": [
+    "short-link",
+    "link",
+    "keeer"
+  ],
+  "author": "Alan-Liang",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/KEEER/k3r.link/issues"
+  },
+  "homepage": "https://github.com/KEEER/k3r.link#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "hashids": "^2.2.1",
+    "koa": "^2.11.0",
+    "pg": "^8.0.2",
+    "yaml": "^1.8.3"
+  }
+}
