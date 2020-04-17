@@ -1,7 +1,7 @@
 {
   "name": "k3r-link",
   "version": "0.0.0",
-  "description": "Source code of k3r.link",
+  "description": "Source code of k3r.run and k3r.link",
   "main": "src/index.js",
   "scripts": {
     "start": "node .",

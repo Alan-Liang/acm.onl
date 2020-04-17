@@ -29,15 +29,17 @@ app.use(async (ctx, next) => {
 })
 app.use(async ctx => {
   const { path } = ctx
-  if (path.startsWith(VOTE_PREFIX)) {
-    const hashid = path.substring(VOTE_PREFIX.length)
-    const id = hashids.decode(hashid)
-    if (id.length !== 1) return ctx.status = 404
-    const res = await pool.query(stmt('SELECT PRE_users.name AS uname, PRE_forms.name FROM PRE_users, PRE_forms WHERE PRE_forms.id = $1 AND PRE_users.id = PRE_forms.user_id;'), id)
-    if (res.rows.length < 1) return ctx.status = 404
-    const { uname, name } = res.rows[0]
-    return ctx.redirect(`${VOTE_BASE}/${uname}/${name}/fill${VOTE_SEARCH}`)
-  }
+  try {
+    if (path.startsWith(VOTE_PREFIX)) {
+      const hashid = path.substring(VOTE_PREFIX.length)
+      const id = hashids.decode(hashid)
+      if (id.length !== 1) return ctx.status = 404
+      const res = await pool.query(stmt('SELECT PRE_users.name AS uname, PRE_forms.name FROM PRE_users, PRE_forms WHERE PRE_forms.id = $1 AND PRE_users.id = PRE_forms.user_id;'), id)
+      if (res.rows.length < 1) return ctx.status = 404
+      const { uname, name } = res.rows[0]
+      return ctx.redirect(`${VOTE_BASE}/${uname}/${name}/fill${VOTE_SEARCH}`)
+    }
+  } catch (e) { /* empty */ }
   if (path === '' || !path in links) ctx.path = 'keeer'
   ctx.redirect(links[path])
 })
