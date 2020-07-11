@@ -40,8 +40,8 @@ app.use(async ctx => {
       return ctx.redirect(`${VOTE_BASE}/${uname}/${name}/fill${VOTE_SEARCH}`)
     }
   } catch (e) { /* empty */ }
-  if (path === '' || !path in links) ctx.path = 'keeer'
-  ctx.redirect(links[path])
+  if (path === '' || !(path in links)) ctx.path = '/keeer'
+  ctx.redirect(links[ctx.path])
 })
 
 app.listen(parseInt(PORT), HOST)
