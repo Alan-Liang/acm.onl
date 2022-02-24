@@ -1,20 +1,16 @@
 require('dotenv').config()
 const Koa = require('koa')
 const YAML = require('yaml')
-const { Pool } = require('pg')
 const { readFileSync, appendFile: appendFileCb } = require('fs')
 const { promisify } = require('util')
-const Hashids = require('hashids/cjs')
 const appendFile = promisify(appendFileCb)
 
-const { HOST, PORT, HASHID_SALT, VOTE_PREFIX, VOTE_BASE, VOTE_SEARCH, TABLEPREFIX, LINKS, LOGFILE, ERRFILE } = process.env
+const { HOST, PORT, LINKS, LOGFILE, ERRFILE } = process.env
 const links = YAML.parse(readFileSync(LINKS).toString())
 
 const app = new Koa()
 app.proxy = true
-const pool = new Pool()
-const stmt = sql => sql.replace(/PRE_/g, TABLEPREFIX || '')
-const hashids = new Hashids(HASHID_SALT, undefined, '123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ')
+
 app.use(async (ctx, next) => {
   const start = Date.now()
   try { await next() } catch (e) {
@@ -27,21 +23,33 @@ app.use(async (ctx, next) => {
     await appendFile(LOGFILE, `${ctx.ip} - - [${end.toISOString()}] "${ctx.method} ${ctx.path} HTTP/1.1" ${ctx.status} ${end - start} "${ctx.get('Referrer') || '-'}" "${ctx.get('User-Agent')}"\n`)
   }
 })
+
+const handlers = {
+  '/oj' (path) {
+    const OJ_BASE = 'https://acm.sjtu.edu.cn/OnlineJudge/'
+    if (!path) return OJ_BASE
+    if (/^\d+$/.test(path)) return new URL('problem?problem_id=' + path, OJ_BASE)
+    if (/^p\/\d+$/i.test(path)) return new URL('problem?problem_id=' + path.slice(2), OJ_BASE)
+    if (/^c\/\d+$/i.test(path)) return new URL('contest?contest_id=' + path.slice(2), OJ_BASE)
+    if (/^h\/\d+$/i.test(path)) return new URL('homework?homework_id=' + path.slice(2), OJ_BASE)
+    if (/^s\/\d+$/i.test(path)) return new URL('code?submit_id=' + path.slice(2), OJ_BASE)
+    return new URL(path, OJ_BASE)
+  },
+}
+
 app.use(async ctx => {
   const { path } = ctx
-  try {
-    if (path.startsWith(VOTE_PREFIX)) {
-      const hashid = path.substring(VOTE_PREFIX.length)
-      const id = hashids.decode(hashid)
-      if (id.length !== 1) return ctx.status = 404
-      const res = await pool.query(stmt('SELECT PRE_users.name AS uname, PRE_forms.name FROM PRE_users, PRE_forms WHERE PRE_forms.id = $1 AND PRE_users.id = PRE_forms.user_id;'), id)
-      if (res.rows.length < 1) return ctx.status = 404
-      const { uname, name } = res.rows[0]
-      return ctx.redirect(`${VOTE_BASE}/${uname}/${name}/fill${VOTE_SEARCH}`)
+  if (path in links) {
+    ctx.redirect(links[path])
+    return
+  }
+  for (const prefix of Object.keys(handlers)) {
+    if (path.startsWith(prefix + '/') || path === prefix) {
+      ctx.redirect(handlers[prefix](path.replace(prefix, '').replace(/^\//, '')))
+      return
     }
-  } catch (e) { /* empty */ }
-  if (path === '' || !(path in links)) ctx.path = '/keeer'
-  ctx.redirect(links[ctx.path])
+  }
+  ctx.redirect(new URL(path, 'https://acm.sjtu.app'))
 })
 
 app.listen(parseInt(PORT), HOST)

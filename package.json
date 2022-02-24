@@ -24,9 +24,7 @@
   "homepage": "https://github.com/KEEER/k3r.link#readme",
   "dependencies": {
     "dotenv": "^8.2.0",
-    "hashids": "^2.2.1",
     "koa": "^2.11.0",
-    "pg": "^8.0.2",
     "yaml": "^1.8.3"
   }
 }
