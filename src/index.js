@@ -29,10 +29,19 @@ const handlers = {
     const OJ_BASE = 'https://acm.sjtu.edu.cn/OnlineJudge/'
     if (!path) return OJ_BASE
     if (/^\d+$/.test(path)) return new URL('problem?problem_id=' + path, OJ_BASE)
-    if (/^p\/\d+$/i.test(path)) return new URL('problem?problem_id=' + path.slice(2), OJ_BASE)
-    if (/^c\/\d+$/i.test(path)) return new URL('contest?contest_id=' + path.slice(2), OJ_BASE)
-    if (/^h\/\d+$/i.test(path)) return new URL('homework?homework_id=' + path.slice(2), OJ_BASE)
-    if (/^s\/\d+$/i.test(path)) return new URL('code?submit_id=' + path.slice(2), OJ_BASE)
+    path = decodeURIComponent(path)
+    const map = {
+      p: 'problem?problem_id=',
+      c: 'contest?contest_id=',
+      h: 'homework?homework_id=',
+      s: 'code?submit_id=',
+    }
+    for (const k in map) map[k + '/'] = map[k]
+    for (const k in map) {
+      if (new RegExp(String.raw`^${k}\d+$`, 'i').test(path)) {
+        return new URL(map[k] + path.slice(k.length), OJ_BASE)
+      }
+    }
     return new URL(path, OJ_BASE)
   },
 }
