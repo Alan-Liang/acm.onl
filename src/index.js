@@ -26,7 +26,7 @@ app.use(async (ctx, next) => {
 
 const handlers = {
   '/oj' (path) {
-    const OJ_BASE = 'http://oj.acm.onl:5000/OnlineJudge/'
+    const OJ_BASE = 'https://acm.sjtu.edu.cn/OnlineJudge/'
     if (!path) return OJ_BASE
     if (/^\d+$/.test(path)) return new URL('problem?problem_id=' + path, OJ_BASE)
     path = decodeURIComponent(path)
