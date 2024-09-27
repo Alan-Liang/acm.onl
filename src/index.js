@@ -28,13 +28,13 @@ const handlers = {
   '/oj' (path) {
     const OJ_BASE = 'https://acm.sjtu.edu.cn/OnlineJudge/'
     if (!path) return OJ_BASE
-    if (/^\d+$/.test(path)) return new URL('problem?problem_id=' + path, OJ_BASE)
+    if (/^\d+$/.test(path)) return new URL('problem/' + path, OJ_BASE)
     path = decodeURIComponent(path)
     const map = {
-      p: 'problem?problem_id=',
-      c: 'contest?contest_id=',
-      h: 'homework?homework_id=',
-      s: 'code?submit_id=',
+      p: 'problem/',
+      c: 'contest/',
+      h: 'homework/',
+      s: 'code/',
     }
     for (const k in map) map[k + '/'] = map[k]
     for (const k in map) {
